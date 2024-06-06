@@ -2,18 +2,18 @@ export function startGame(): PongGameState {
   const paddleWidth = 10;
   const paddleHeight = 50;
   const paddleAnchor = { x: 0, y: 0 };
-  const ballRadius = 30;
+  const ballRadius = 10;
   const fieldWidth = 750;
   const fieldHeight = 250;
   const initialPaddleYPosition = fieldHeight / 2 - paddleHeight / 2;
-
+  const paddleOffset = 10;
   return {
     left: {
       width: paddleWidth,
       height: paddleHeight,
       anchor: paddleAnchor,
       position: {
-        x: 10,
+        x: paddleOffset,
         y: initialPaddleYPosition,
       },
     },
@@ -22,22 +22,22 @@ export function startGame(): PongGameState {
       height: paddleHeight,
       anchor: paddleAnchor,
       position: {
-        x: fieldWidth - 10,
+        x: fieldWidth - paddleOffset - paddleWidth,
         y: initialPaddleYPosition,
       },
     },
     ball: {
       radius: ballRadius,
       anchor: {
-        x: ballRadius / 2,
-        y: ballRadius / 2,
+        x: 0,
+        y: 0,
       },
       position: {
-        x: fieldWidth / 2,
-        y: fieldHeight / 2,
+        x: fieldWidth / 2 - ballRadius,
+        y: fieldHeight / 2 - ballRadius,
       },
-      speedX: 0,
-      speedY: 0,
+      speedX: 6.2,
+      speedY: 12,
     },
     field: {
       width: fieldWidth,
@@ -50,18 +50,16 @@ export function startGame(): PongGameState {
   };
 }
 
-function playerScored(
-  state: PongGameState,
-  side: "left" | "right",
-): PongGameState {
+function playerScored(state: PongGameState, side: "left" | "right"): void {
   const newGame = startGame();
-  return {
+  const test = {
     ...newGame,
     score: {
       left: side === "left" ? state.score.left + 1 : state.score.left,
       right: side === "right" ? state.score.right + 1 : state.score.right,
     },
   };
+  Object.assign(state, test);
 }
 
 export function tick(state: PongGameState): void {
@@ -79,33 +77,30 @@ function ballBounce(state: PongGameState): void {
   const { left, right } = state;
   const { position, radius } = ball;
   const { field } = state;
-  let ballBouncedOffPaddle = false;
 
   if (position.y + radius >= field.height || position.y - radius <= 0) {
     ball.speedY *= -1;
   }
 
+  // hit detection left paddle
   if (
-    position.x - radius <= left.position.x + left.width &&
+    position.x <= left.position.x + left.width &&
     position.y >= left.position.y &&
-    position.y + radius <= left.position.y + left.height
+    position.y + 2 * radius <= left.position.y + left.height
   ) {
     ball.speedX *= -1;
-    ballBouncedOffPaddle = true;
   }
 
+  // hit detection right paddle
   if (
-    position.x + radius >= right.position.x &&
+    position.x + 2 * radius >= right.position.x &&
     position.y >= right.position.y &&
-    position.y + radius <= right.position.y + right.height
+    position.y + 2 * radius <= right.position.y + right.height
   ) {
     ball.speedX *= -1;
-    ballBouncedOffPaddle = true;
   }
 
-  if (ballBouncedOffPaddle) {
-    checkBallOutOfBounds(state);
-  }
+  checkBallOutOfBounds(state);
 }
 
 function checkBallOutOfBounds(state: PongGameState): void {
@@ -113,11 +108,11 @@ function checkBallOutOfBounds(state: PongGameState): void {
   const { position, radius } = ball;
   const { field } = state;
 
-  if (position.x - radius <= 0) {
+  if (position.x - 2 * radius <= 0) {
     playerScored(state, "right");
   }
 
-  if (position.x + radius >= field.width) {
+  if (position.x + 2 * radius >= field.width) {
     playerScored(state, "left");
   }
 }
