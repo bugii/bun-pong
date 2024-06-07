@@ -69,5 +69,11 @@ export function Pong(props: PongProps) {
     onCleanup(() => cancelAnimationFrame(frame));
   });
 
-  return <canvas ref={canvas!} width="750" height="250"></canvas>;
+  return (
+    <div class="inline-grid grid-cols-2">
+      <canvas ref={canvas!} width="750" height="250" class="col-span-2" />
+      <div>{props.game.players.left}</div>
+      <div>{props.game.players.right}</div>
+    </div>
+  );
 }

@@ -25,11 +25,12 @@ const App: Component = () => {
   }
 
   return (
-    <>
-      <div class="flex flex-col items-start">
+    <div class="p-4">
+      <h1 class="text-xl mb-6">Bun Pong</h1>
+      <div class="inline-grid grid-cols-[auto,auto] gap-2">
         <Show
           fallback={
-            <div>
+            <>
               <span>enter your room id</span>
               <input
                 onChange={(e) => {
@@ -38,15 +39,17 @@ const App: Component = () => {
                 class="border"
                 type="text"
               />
-            </div>
+            </>
           }
           when={game() !== undefined}
         >
-          <b>roomId: {roomId()}</b>
+          <span>roomId:</span>
+          <span>{roomId()}</span>
         </Show>
+
         <Show
           fallback={
-            <div class="flex gap-4">
+            <>
               <span>enter username</span>
               <input
                 type="text"
@@ -55,25 +58,37 @@ const App: Component = () => {
                 }}
                 class="border"
               />
-            </div>
+
+              <button
+                onClick={join}
+                class="px-4 py-2 justify-self-start bg-blue-600 hover:bg-blue-500 disabled:bg-gray-300 rounded text-white"
+              >
+                join now
+              </button>
+            </>
           }
           when={game()}
         >
-          <b>username: {username()}</b>
-        </Show>
+          <span>username:</span>
+          <span>{username()}</span>
 
-        <button onClick={join} class="disabled:text-gray-300">
-          join now
-        </button>
+          <span>Score</span>
+          <div class="flex gap-2">
+            <b>{game()?.state.score.left}</b>-<b>{game()?.state.score.right}</b>
+          </div>
+        </Show>
       </div>
-      <Show
-        when={game() !== undefined && ws() !== undefined}
-        fallback={<p>Waiting for game to start ...</p>}
-      >
-        <Pong game={game()!} />
-        <MovementControls webSocket={ws()!} />
-      </Show>
-    </>
+
+      <div class="mt-6">
+        <Show
+          when={game() !== undefined && ws() !== undefined}
+          fallback={<p>Waiting for game to start ...</p>}
+        >
+          <Pong game={game()!} />
+          <MovementControls webSocket={ws()!} />
+        </Show>
+      </div>
+    </div>
   );
 };
 
