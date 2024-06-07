@@ -1,11 +1,9 @@
 import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
-import { Game, MoveMessage } from "../../shared/types";
+import { Game } from "../../shared/types";
 import { MovementControls } from "./MovementControls";
 
 const App: Component = () => {
-  console.log("running main compoment");
-
   const [roomId, setRoomId] = createSignal("");
   const [username, setUsername] = createSignal("");
 
@@ -29,25 +27,25 @@ const App: Component = () => {
   return (
     <>
       <div class="flex flex-col items-start">
-        <Show fallback={
-          <div>
-            <span>enter your room id</span>
-            <input
-              onChange={(e) => {
-                setRoomId(e.target.value);
-              }}
-              class="border"
-              type="text"
-            />
-          </div>
-
-        }
-          when={game()}>
+        <Show
+          fallback={
+            <div>
+              <span>enter your room id</span>
+              <input
+                onChange={(e) => {
+                  setRoomId(e.target.value);
+                }}
+                class="border"
+                type="text"
+              />
+            </div>
+          }
+          when={game() !== undefined}
+        >
           <b>roomId: {roomId()}</b>
         </Show>
         <Show
           fallback={
-
             <div class="flex gap-4">
               <span>enter username</span>
               <input
@@ -58,7 +56,9 @@ const App: Component = () => {
                 class="border"
               />
             </div>
-          } when={game()}>
+          }
+          when={game()}
+        >
           <b>username: {username()}</b>
         </Show>
 
