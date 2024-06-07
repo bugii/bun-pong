@@ -1,28 +1,27 @@
-import { onCleanup, onMount } from "solid-js";
+import { createEffect, onCleanup, onMount } from "solid-js";
 import { Field, Ball, Paddle, Game } from "../../shared/types";
 
 type PongProps = {
   game: Game;
 };
-export function Pong({ game }: PongProps) {
+export function Pong(props: PongProps) {
   let canvas: HTMLCanvasElement | undefined;
+  console.log('Pong');
 
   onMount(() => {
     const ctx = canvas?.getContext("2d");
     if (!ctx) {
       return;
     }
-    // const game = startGame();
-
     let frame = requestAnimationFrame(() => loop(ctx));
 
     function loop(ctx: CanvasRenderingContext2D) {
-      // tick(game);
-      drawField(game.field, ctx);
-      drawMidlines(game.field, ctx);
-      drawBall(game.ball, ctx);
-      drawPaddle(game.left, ctx);
-      drawPaddle(game.right, ctx);
+      const { field, ball, left, right } = props.game.state;
+      drawField(field, ctx);
+      drawMidlines(field, ctx);
+      drawBall(ball, ctx);
+      drawPaddle(left, ctx);
+      drawPaddle(right, ctx);
 
       frame = requestAnimationFrame(() => loop(ctx));
     }
@@ -68,24 +67,6 @@ export function Pong({ game }: PongProps) {
       );
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "ArrowUp":
-          move(game, "right", "up");
-          break;
-        case "ArrowDown":
-          move(game, "right", "down");
-          break;
-        case "w":
-          move(game, "left", "up");
-          break;
-        case "s":
-          move(game, "left", "down");
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
 
     onCleanup(() => cancelAnimationFrame(frame));
   });

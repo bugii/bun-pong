@@ -1,6 +1,6 @@
 import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
-import { Game } from "../../shared/types";
+import { Game, MoveMessage } from "../../shared/types";
 
 const App: Component = () => {
   console.log("running main compoment");
@@ -9,6 +9,7 @@ const App: Component = () => {
   const [username, setUsername] = createSignal("");
 
   const [game, setGame] = createSignal<undefined | Game>(undefined);
+  const [ws, setWs] = createSignal<undefined | WebSocket>(undefined);
 
   function join() {
     console.log("joining, ", roomId());
@@ -17,12 +18,40 @@ const App: Component = () => {
     );
 
     ws.onmessage = (msg) => {
-      console.log("received msg", msg.data);
       const parsedGame: Game = JSON.parse(msg.data);
       setGame(parsedGame);
     };
+
+    setWs(ws);
   }
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowUp":
+      case "w":
+        sendMoveMessage("up");
+        break;
+      case "ArrowDown":
+      case "s":
+        sendMoveMessage("down");
+        break;
+    }
+  };
+
+  function sendMoveMessage(direction: 'up' | 'down') {
+    const webSocket = ws();
+    if (!game() || !webSocket) {
+      return;
+    }
+
+    const moveMessage: MoveMessage = {
+      direction,
+      id: 'move'
+    }
+    webSocket.send(JSON.stringify(moveMessage));
+  }
+
+  document.addEventListener("keydown", handleKeyDown);
   return (
     <div>
       <div>
