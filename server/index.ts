@@ -45,7 +45,6 @@ const server = Bun.serve<{ username: string; roomId: string }>({
     },
     // this is called when a message is received
     async message(ws, message) {
-      console.log(`Received ${message}`);
       const parsedMessage: Message = JSON.parse(message.toString());
       const game = games.get(ws.data.roomId);
       if (!game || !game.players.right) {
@@ -84,4 +83,4 @@ setInterval(() => {
   }
 
   games.entries();
-}, 1000 / 60);
+}, 1000 / 30);

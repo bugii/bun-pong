@@ -39,7 +39,7 @@ export function getInitialGameState(): PongGameState {
         y: fieldHeight / 2 - ballRadius,
       },
       speedX: 4,
-      speedY: 4,
+      speedY: 6,
     },
     field: {
       width: fieldWidth,
