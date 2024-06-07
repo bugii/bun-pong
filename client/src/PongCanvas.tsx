@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, onMount } from "solid-js";
+import { onCleanup, onMount } from "solid-js";
 import { Field, Ball, Paddle, Game } from "../../shared/types";
 
 type PongProps = {
@@ -6,7 +6,6 @@ type PongProps = {
 };
 export function Pong(props: PongProps) {
   let canvas: HTMLCanvasElement | undefined;
-  console.log('Pong');
 
   onMount(() => {
     const ctx = canvas?.getContext("2d");
@@ -66,7 +65,6 @@ export function Pong(props: PongProps) {
         paddle.height,
       );
     }
-
 
     onCleanup(() => cancelAnimationFrame(frame));
   });
