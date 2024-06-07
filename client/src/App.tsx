@@ -1,6 +1,7 @@
 import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
 import { Game, MoveMessage } from "../../shared/types";
+import { MovementControls } from "./MovementControls";
 
 const App: Component = () => {
   console.log("running main compoment");
@@ -25,68 +26,54 @@ const App: Component = () => {
     setWs(ws);
   }
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowUp":
-      case "w":
-        sendMoveMessage("up");
-        break;
-      case "ArrowDown":
-      case "s":
-        sendMoveMessage("down");
-        break;
-    }
-  };
-
-  function sendMoveMessage(direction: 'up' | 'down') {
-    const webSocket = ws();
-    if (!game() || !webSocket) {
-      return;
-    }
-
-    const moveMessage: MoveMessage = {
-      direction,
-      id: 'move'
-    }
-    webSocket.send(JSON.stringify(moveMessage));
-  }
-
-  document.addEventListener("keydown", handleKeyDown);
   return (
-    <div>
-      <div>
-        <span>enter your room id</span>
-        <input
-          onChange={(e) => {
-            setRoomId(e.target.value);
-          }}
-          class="border"
-          type="text"
-        />
+    <>
+      <div class="flex flex-col items-start">
+        <Show fallback={
+          <div>
+            <span>enter your room id</span>
+            <input
+              onChange={(e) => {
+                setRoomId(e.target.value);
+              }}
+              class="border"
+              type="text"
+            />
+          </div>
+
+        }
+          when={game()}>
+          <b>roomId: {roomId()}</b>
+        </Show>
+        <Show
+          fallback={
+
+            <div class="flex gap-4">
+              <span>enter username</span>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                class="border"
+              />
+            </div>
+          } when={game()}>
+          <b>username: {username()}</b>
+        </Show>
+
+        <button onClick={join} class="disabled:text-gray-300">
+          join now
+        </button>
       </div>
-
-      <div class="flex gap-4">
-        <span>enter username</span>
-        <input
-          type="text"
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-          class="border"
-        />
-      </div>
-
-      <button onClick={join} class="disabled:text-gray-300">
-        join now
-      </button>
-
       <Show
-        when={game() !== undefined}
+        when={game() !== undefined && ws() !== undefined}
         fallback={<p>Waiting for game to start ...</p>}
       >
         <Pong game={game()!} />
+        <MovementControls webSocket={ws()!} />
       </Show>
-    </div>
+    </>
   );
 };
 
