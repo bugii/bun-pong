@@ -9,7 +9,7 @@ import {
 const games: Map<string, Game> = new Map();
 
 const server = Bun.serve<{ username: string; roomId: string }>({
-  port: 4444,
+  port: process.env.PORT || 4444,
   fetch(req, server) {
     const url = new URL(req.url);
 
