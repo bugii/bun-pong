@@ -1,4 +1,5 @@
 import { createSignal, type Component } from "solid-js";
+import { Pong } from "./PongCanvas";
 
 const App: Component = () => {
   console.log("running main compoment");
@@ -19,7 +20,7 @@ const App: Component = () => {
 
   return (
     <div>
-      <div class="flex gap-4">
+      <div>
         <span>enter your room id</span>
         <input
           onChange={(e) => {
@@ -44,6 +45,8 @@ const App: Component = () => {
       <button onClick={join} class="disabled:text-gray-300">
         join now
       </button>
+
+      <Pong />
     </div>
   );
 };
