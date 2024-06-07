@@ -9,11 +9,12 @@ const App: Component = () => {
 
   const [game, setGame] = createSignal<undefined | Game>(undefined);
   const [ws, setWs] = createSignal<undefined | WebSocket>(undefined);
+  const backendUrl = import.meta.env.PROD ? 'wss://bun-pong.onrender.com' : 'ws://localhost';
 
   function join() {
     console.log("joining, ", roomId());
     const ws = new WebSocket(
-      `ws:localhost:4444?username=${username()}&roomId=${roomId()}`,
+      `${backendUrl}:4444?username=${username()}&roomId=${roomId()}`,
     );
 
     ws.onmessage = (msg) => {
