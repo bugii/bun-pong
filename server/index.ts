@@ -1,5 +1,10 @@
 import { getInitialGameState, move, tick } from "./pong";
-import { PongGameState } from "../shared/types";
+import {
+  type Game,
+  type GameEndedMessage,
+  type GameStateMessage,
+  type Message,
+} from "../shared/types";
 
 const games: Map<string, Game> = new Map();
 
@@ -58,6 +63,11 @@ const server = Bun.serve<{ username: string; roomId: string }>({
           break;
       }
     },
+    close(ws) {
+      games.delete(ws.data.roomId);
+      const message: GameEndedMessage = { id: "gameEnd" };
+      ws.publish(ws.data.roomId, JSON.stringify(message));
+    },
   },
 });
 
@@ -66,7 +76,11 @@ console.log(`Listening on ${server.hostname}:${server.port}`);
 setInterval(() => {
   for (const [roomId, game] of games.entries()) {
     if (game.players.right !== undefined) tick(game.state);
-    server.publish(roomId, JSON.stringify(game));
+    const message: GameStateMessage = {
+      id: "gameState",
+      game,
+    };
+    server.publish(roomId, JSON.stringify(message));
   }
 
   games.entries();

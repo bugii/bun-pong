@@ -1,8 +1,17 @@
-export type Message = MoveMessage;
+export type Message = MoveMessage | GameEndedMessage | GameStateMessage;
+
+export type GameStateMessage = {
+  id: "gameState";
+  game: Game;
+};
 
 export type MoveMessage = {
   id: "move";
   direction: "up" | "down";
+};
+
+export type GameEndedMessage = {
+  id: "gameEnd";
 };
 
 export type Game = {

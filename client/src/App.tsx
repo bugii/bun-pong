@@ -1,6 +1,6 @@
 import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
-import { Game } from "../../shared/types";
+import { Game, Message } from "../../shared/types";
 import { MovementControls } from "./MovementControls";
 
 const App: Component = () => {
@@ -17,8 +17,21 @@ const App: Component = () => {
     );
 
     ws.onmessage = (msg) => {
-      const parsedGame: Game = JSON.parse(msg.data);
-      setGame(parsedGame);
+      const message: Message = JSON.parse(msg.data);
+      switch (message.id) {
+        case 'gameState':
+          setGame(message.game);
+          break;
+        case 'gameEnd':
+          ws.close();
+          setRoomId('');
+          setUsername('');
+          setGame(undefined);
+          break;
+        default:
+          console.log('Encountered unknown message id:', message);
+      }
+
     };
 
     setWs(ws);
