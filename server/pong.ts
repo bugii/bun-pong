@@ -55,15 +55,21 @@ export function getInitialGameState(): PongGameState {
 }
 
 function playerScored(state: PongGameState, side: "left" | "right"): void {
-  const newGame = getInitialGameState();
-  const test = {
-    ...newGame,
+  const newGame: PongGameState = {
+    ...getInitialGameState(),
     score: {
       left: side === "left" ? state.score.left + 1 : state.score.left,
       right: side === "right" ? state.score.right + 1 : state.score.right,
     },
+    ball: {
+      ...getInitialGameState().ball,
+      speedX: (Math.random() * (8 - 4) + 4) * (Math.random() < 0.5 ? -1 : 1),
+      speedY: (Math.random() * (8 - 4) + 4) * (Math.random() < 0.5 ? -1 : 1),
+    },
+    left: { ...state.left },
+    right: { ...state.right },
   };
-  Object.assign(state, test);
+  Object.assign(state, newGame);
 }
 
 export function tick(state: PongGameState): void {
