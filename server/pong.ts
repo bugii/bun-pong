@@ -1,3 +1,5 @@
+import type { Ball, PongGameState } from "../shared/types";
+
 export function getInitialGameState(): PongGameState {
   const paddleWidth = 10;
   const paddleHeight = 50;
@@ -125,11 +127,16 @@ function checkBallOutOfBounds(state: PongGameState): void {
 
 export function move(
   state: PongGameState,
-  paddle: "left" | "right",
+  paddleSide: "left" | "right",
   direction: "up" | "down",
-): PongGameState {
+): void {
   const yDelta = direction === "up" ? -1 : 1;
-  state[paddle].position.y += yDelta * state[paddle].speed;
-  // todo check if paddle out of bounds
-  return state;
+  const paddle = state[paddleSide];
+  const newYPosition = paddle.position.y + yDelta * paddle.speed;
+
+  if (newYPosition <= 0 || newYPosition + paddle.height >= state.field.height) {
+    return;
+  }
+
+  paddle.position.y = newYPosition;
 }
