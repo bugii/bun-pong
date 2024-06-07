@@ -1,8 +1,9 @@
-import { onCleanup, onMount } from "solid-js";
-import { startGame, tick, Ball, Paddle, Field } from "./pong";
+import { createSignal, onCleanup, onMount } from "solid-js";
+import { startGame, tick, Ball, Paddle, Field, move } from "./pong";
 
 export function Pong() {
   let canvas: HTMLCanvasElement | undefined;
+
   onMount(() => {
     const ctx = canvas?.getContext("2d");
     if (!ctx) {
@@ -16,14 +17,7 @@ export function Pong() {
     function loop(ctx: CanvasRenderingContext2D) {
       tick(game);
       drawField(game.field, ctx);
-      ctx.beginPath();
-      ctx.moveTo(game.field.width / 2, 0);
-      ctx.lineTo(game.field.width / 2, game.field.height);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, game.field.height / 2);
-      ctx.lineTo(game.field.width, game.field.height / 2);
-      ctx.stroke();
+      drawMidlines(game.field, ctx);
       drawBall(game.ball, ctx);
       drawPaddle(game.left, ctx);
       drawPaddle(game.right, ctx);
@@ -31,9 +25,20 @@ export function Pong() {
       frame = requestAnimationFrame(() => loop(ctx));
     }
 
+    function drawMidlines(field: Field, ctx: CanvasRenderingContext2D) {
+      ctx.beginPath();
+      ctx.moveTo(field.width / 2, 0);
+      ctx.lineTo(field.width / 2, field.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, field.height / 2);
+      ctx.lineTo(field.width, field.height / 2);
+      ctx.stroke();
+    }
+
     function drawField(field: Field, ctx: CanvasRenderingContext2D) {
       ctx.fillStyle = "beige";
-      ctx.fillRect(0, 0, game.field.width, game.field.height);
+      ctx.fillRect(0, 0, field.width, field.height);
     }
 
     function drawBall(ball: Ball, ctx: CanvasRenderingContext2D) {
@@ -49,6 +54,27 @@ export function Pong() {
       ctx.fillStyle = "orange";
       ctx.fillRect(paddle.position.x, paddle.position.y, paddle.width, paddle.height);
     }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          move(game, 'right', 'up');
+          break;
+        case 'ArrowDown':
+          move(game, 'right', 'down');
+          break;
+        case 'w':
+          move(game, 'left', 'up');
+          break;
+        case 's':
+          move(game, 'left', 'down');
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+
 
     onCleanup(() => cancelAnimationFrame(frame));
   });

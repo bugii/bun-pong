@@ -16,6 +16,7 @@ export function startGame(): PongGameState {
         x: paddleOffset,
         y: initialPaddleYPosition,
       },
+      speed: 8,
     },
     right: {
       width: paddleWidth,
@@ -25,6 +26,7 @@ export function startGame(): PongGameState {
         x: fieldWidth - paddleOffset - paddleWidth,
         y: initialPaddleYPosition,
       },
+      speed: 8,
     },
     ball: {
       radius: ballRadius,
@@ -36,8 +38,8 @@ export function startGame(): PongGameState {
         x: fieldWidth / 2 - ballRadius,
         y: fieldHeight / 2 - ballRadius,
       },
-      speedX: 6.2,
-      speedY: 12,
+      speedX: 4,
+      speedY: 4,
     },
     field: {
       width: fieldWidth,
@@ -77,8 +79,8 @@ function ballBounce(state: PongGameState): void {
   const { left, right } = state;
   const { position, radius } = ball;
   const { field } = state;
-
-  if (position.y + radius >= field.height || position.y - radius <= 0) {
+  let ballBouncedOffPaddle = false;
+  if (position.y + 2 * radius >= field.height || position.y <= 0) {
     ball.speedY *= -1;
   }
 
@@ -86,9 +88,10 @@ function ballBounce(state: PongGameState): void {
   if (
     position.x <= left.position.x + left.width &&
     position.y >= left.position.y &&
-    position.y + 2 * radius <= left.position.y + left.height
+    position.y <= left.position.y + left.height
   ) {
     ball.speedX *= -1;
+    ballBouncedOffPaddle = true;
   }
 
   // hit detection right paddle
@@ -98,9 +101,12 @@ function ballBounce(state: PongGameState): void {
     position.y + 2 * radius <= right.position.y + right.height
   ) {
     ball.speedX *= -1;
+    ballBouncedOffPaddle = true;
   }
 
-  checkBallOutOfBounds(state);
+  if (!ballBouncedOffPaddle) {
+    checkBallOutOfBounds(state);
+  }
 }
 
 function checkBallOutOfBounds(state: PongGameState): void {
@@ -123,7 +129,7 @@ export function move(
   direction: "up" | "down",
 ): PongGameState {
   const yDelta = direction === "up" ? -1 : 1;
-  state[paddle].position.y += yDelta;
+  state[paddle].position.y += yDelta * state[paddle].speed;
   // todo check if paddle out of bounds
   return state;
 }
@@ -141,6 +147,7 @@ export type Paddle = {
   height: number;
   position: Position;
   anchor: Anchor;
+  speed: number;
 };
 
 export type Ball = {
