@@ -8,8 +8,17 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "noEmit": true,
-    "isolatedModules": true,
+    "isolatedModules": true
   },
+  "references": [
+    {
+      "path": "../shared",
+      // add 'prepend' if you want to include the referenced project in your output file
+      "prepend": true
+    }
+  ]
 }

@@ -1,11 +1,14 @@
-import { createSignal, type Component } from "solid-js";
+import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
+import { Game } from "../../shared/types";
 
 const App: Component = () => {
   console.log("running main compoment");
 
   const [roomId, setRoomId] = createSignal("");
   const [username, setUsername] = createSignal("");
+
+  const [game, setGame] = createSignal<undefined | Game>(undefined);
 
   function join() {
     console.log("joining, ", roomId());
@@ -15,6 +18,8 @@ const App: Component = () => {
 
     ws.onmessage = (msg) => {
       console.log("received msg", msg.data);
+      const parsedGame: Game = JSON.parse(msg.data);
+      setGame(parsedGame);
     };
   }
 
@@ -46,7 +51,12 @@ const App: Component = () => {
         join now
       </button>
 
-      <Pong />
+      <Show
+        when={game() !== undefined}
+        fallback={<p>Waiting for game to start ...</p>}
+      >
+        <Pong game={game()!} />
+      </Show>
     </div>
   );
 };

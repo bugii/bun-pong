@@ -1,3 +1,8 @@
+import { getInitialGameState, move, tick } from "./pong";
+import { PongGameState } from "../shared/types";
+
+const games: Map<string, Game> = new Map();
+
 const server = Bun.serve<{ username: string; roomId: string }>({
   port: 4444,
   fetch(req, server) {
@@ -20,21 +25,49 @@ const server = Bun.serve<{ username: string; roomId: string }>({
   },
   websocket: {
     open(ws) {
-      const msg = `joined ${ws.data.username} ${ws.data.roomId}`;
+      const { roomId, username } = ws.data;
       ws.subscribe(ws.data.roomId);
-      server.publish(ws.data.roomId, msg);
+      const gameForRoom = games.get(roomId);
+      if (!gameForRoom) {
+        games.set(roomId, {
+          roomId,
+          players: { left: username, right: undefined },
+          state: getInitialGameState(),
+        });
+      } else {
+        gameForRoom.players.right = username;
+      }
     },
     // this is called when a message is received
     async message(ws, message) {
       console.log(`Received ${message}`);
-      // send back a message
-      server.publish(
-        ws.data.roomId,
-        `${ws.data.roomId} ${ws.data.username} said: ${message}`,
-      );
+      const parsedMessage: Message = JSON.parse(message.toString());
+      const game = games.get(ws.data.roomId);
+      if (!game || !game.players.right) {
+        return;
+      }
+
+      switch (parsedMessage.id) {
+        case "move":
+          const position =
+            game.players.left === ws.data.username ? "left" : "right";
+          move(game.state, position, parsedMessage.direction);
+          break;
+
+        default:
+          break;
+      }
     },
   },
 });
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
 
+setInterval(() => {
+  for (const [roomId, game] of games.entries()) {
+    if (game.players.right !== undefined) tick(game.state);
+    server.publish(roomId, JSON.stringify(game));
+  }
+
+  games.entries();
+}, 1000 / 60);

@@ -1,4 +1,4 @@
-export function startGame(): PongGameState {
+export function getInitialGameState(): PongGameState {
   const paddleWidth = 10;
   const paddleHeight = 50;
   const paddleAnchor = { x: 0, y: 0 };
@@ -53,7 +53,7 @@ export function startGame(): PongGameState {
 }
 
 function playerScored(state: PongGameState, side: "left" | "right"): void {
-  const newGame = startGame();
+  const newGame = getInitialGameState();
   const test = {
     ...newGame,
     score: {
@@ -133,47 +133,3 @@ export function move(
   // todo check if paddle out of bounds
   return state;
 }
-
-export type PongGameState = {
-  left: Paddle;
-  right: Paddle;
-  ball: Ball;
-  field: Field;
-  score: Score;
-};
-
-export type Paddle = {
-  width: number;
-  height: number;
-  position: Position;
-  anchor: Anchor;
-  speed: number;
-};
-
-export type Ball = {
-  position: Position;
-  anchor: Anchor;
-  radius: number;
-  speedY: number;
-  speedX: number;
-};
-
-export type Field = {
-  width: number;
-  height: number;
-};
-
-export type Score = {
-  left: number;
-  right: number;
-};
-
-export type Anchor = {
-  x: number;
-  y: number;
-};
-
-export type Position = {
-  x: number;
-  y: number;
-};
