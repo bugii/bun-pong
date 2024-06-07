@@ -1,6 +1,6 @@
 import { createSignal, type Component, Show } from "solid-js";
 import { Pong } from "./PongCanvas";
-import { Game } from "../../shared/types";
+import { Game, Message } from "../../shared/types";
 import { MovementControls } from "./MovementControls";
 
 const App: Component = () => {
@@ -9,16 +9,30 @@ const App: Component = () => {
 
   const [game, setGame] = createSignal<undefined | Game>(undefined);
   const [ws, setWs] = createSignal<undefined | WebSocket>(undefined);
+  const backendUrl = import.meta.env.PROD ? 'wss://bun-pong.onrender.com' : 'ws://localhost:4444';
 
   function join() {
     console.log("joining, ", roomId());
     const ws = new WebSocket(
-      `ws:localhost:4444?username=${username()}&roomId=${roomId()}`,
+      `${backendUrl}?username=${username()}&roomId=${roomId()}`,
     );
 
     ws.onmessage = (msg) => {
-      const parsedGame: Game = JSON.parse(msg.data);
-      setGame(parsedGame);
+      const message: Message = JSON.parse(msg.data);
+      switch (message.id) {
+        case 'gameState':
+          setGame(message.game);
+          break;
+        case 'gameEnd':
+          ws.close();
+          setRoomId('');
+          setUsername('');
+          setGame(undefined);
+          break;
+        default:
+          console.log('Encountered unknown message id:', message);
+      }
+
     };
 
     setWs(ws);

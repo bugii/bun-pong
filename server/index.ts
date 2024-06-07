@@ -1,10 +1,15 @@
 import { getInitialGameState, move, tick } from "./pong";
-import { PongGameState } from "../shared/types";
+import {
+  type Game,
+  type GameEndedMessage,
+  type GameStateMessage,
+  type Message,
+} from "../shared/types";
 
 const games: Map<string, Game> = new Map();
 
 const server = Bun.serve<{ username: string; roomId: string }>({
-  port: 4444,
+  port: process.env.PORT || 4444,
   fetch(req, server) {
     const url = new URL(req.url);
 
@@ -40,7 +45,6 @@ const server = Bun.serve<{ username: string; roomId: string }>({
     },
     // this is called when a message is received
     async message(ws, message) {
-      console.log(`Received ${message}`);
       const parsedMessage: Message = JSON.parse(message.toString());
       const game = games.get(ws.data.roomId);
       if (!game || !game.players.right) {
@@ -58,6 +62,11 @@ const server = Bun.serve<{ username: string; roomId: string }>({
           break;
       }
     },
+    close(ws) {
+      games.delete(ws.data.roomId);
+      const message: GameEndedMessage = { id: "gameEnd" };
+      ws.publish(ws.data.roomId, JSON.stringify(message));
+    },
   },
 });
 
@@ -66,8 +75,12 @@ console.log(`Listening on ${server.hostname}:${server.port}`);
 setInterval(() => {
   for (const [roomId, game] of games.entries()) {
     if (game.players.right !== undefined) tick(game.state);
-    server.publish(roomId, JSON.stringify(game));
+    const message: GameStateMessage = {
+      id: "gameState",
+      game,
+    };
+    server.publish(roomId, JSON.stringify(message));
   }
 
   games.entries();
-}, 1000 / 60);
+}, 1000 / 30);
